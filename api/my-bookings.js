@@ -1,4 +1,4 @@
-import { fetchEvents } from '../lib/caldav.js';
+import { fetchBookingEvents } from '../lib/caldav.js';
 import { SLOT_CONFIG } from '../lib/config.js';
 
 export default async function handler(req, res) {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const end = new Date();
     end.setDate(end.getDate() + SLOT_CONFIG.daysAhead);
 
-    const events = await fetchEvents(start, end);
+    const events = await fetchBookingEvents(start, end);
     const name = studentName.trim();
 
     const myBookings = events

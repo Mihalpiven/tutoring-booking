@@ -1,4 +1,4 @@
-import { fetchEvents } from '../lib/caldav.js';
+import { fetchAllEvents } from '../lib/caldav.js';
 import { generateAllSlots, filterAvailableSlots, formatSlotLabel } from '../lib/slots.js';
 import { SLOT_CONFIG } from '../lib/config.js';
 
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const start = new Date();
     const end = new Date(); end.setDate(end.getDate() + SLOT_CONFIG.daysAhead);
 
-    const existingEvents = await fetchEvents(start, end);
+    const existingEvents = await fetchAllEvents(start, end);
     const available = filterAvailableSlots(allSlots, existingEvents);
 
     res.json({

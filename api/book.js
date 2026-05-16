@@ -1,4 +1,4 @@
-import { fetchEvents, createCalendarEvent } from '../lib/caldav.js';
+import { fetchAllEvents, createCalendarEvent } from '../lib/caldav.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const start = new Date(slotStart);
     const end = new Date(slotEnd);
 
-    const surrounding = await fetchEvents(
+    const surrounding = await fetchAllEvents(
       new Date(start.getTime() - 60_000),
       new Date(end.getTime() + 60_000),
     );
