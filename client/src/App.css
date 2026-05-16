@@ -300,3 +300,90 @@ body {
   color: var(--gray-400);
   font-size: 0.9rem;
 }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  background: #fff;
+  padding: 5px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all .15s;
+}
+.tab-btn:hover {
+  color: var(--blue);
+}
+.tab-btn.active {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* ── Bookings list (cancel view) ── */
+.bookings-list {
+  margin-top: 24px;
+}
+.booking-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: var(--gray-50);
+}
+.booking-info {
+  flex: 1;
+  min-width: 0;
+}
+.booking-date {
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 2px;
+}
+.booking-time {
+  color: var(--gray-700);
+  font-size: 0.9rem;
+}
+.booking-summary {
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.btn-danger {
+  padding: 8px 16px;
+  background: #fff;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-danger:hover:not(:disabled) {
+  background: var(--red);
+  color: #fff;
+}
+.btn-danger:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}

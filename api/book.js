@@ -3,8 +3,8 @@ import { fetchEvents, createCalendarEvent } from '../lib/caldav.js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { studentName, subject, slotStart, slotEnd } = req.body;
-  if (!studentName?.trim() || !subject?.trim() || !slotStart || !slotEnd) {
+  const { studentName, phone, subject, slotStart, slotEnd } = req.body;
+  if (!studentName?.trim() || !phone?.trim() || !subject?.trim() || !slotStart || !slotEnd) {
     return res.status(400).json({ error: 'נא למלא את כל השדות' });
   }
 
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
 
     await createCalendarEvent({
       studentName: studentName.trim(),
+      phone: phone.trim(),
       subject: subject.trim(),
       startDate: start,
       endDate: end,
