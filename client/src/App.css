@@ -387,3 +387,11 @@ body {
   opacity: .5;
   cursor: not-allowed;
 }
+
+.btn-google {
+  display: inline-block;
+  width: auto;
+  text-decoration: none;
+  text-align: center;
+  margin: 4px 0 0;
+}

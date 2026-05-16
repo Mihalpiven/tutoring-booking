@@ -38,6 +38,17 @@ function formatDateLong(iso) {
   });
 }
 
+function googleCalendarUrl({ start, end, name, subject }) {
+  const fmt = (d) => new Date(d).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `שיעור פרטי - ${subject}`,
+    dates: `${fmt(start)}/${fmt(end)}`,
+    details: `תלמיד: ${name}\nנושא: ${subject}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 export default function App() {
   const [tab, setTab] = useState('book');
 
@@ -130,7 +141,21 @@ function BookView() {
           <p>{formatDateLong(selectedSlot.start)}</p>
           <p>{formatTime(selectedSlot.start)} – {formatTime(selectedSlot.end)}</p>
         </div>
-        <p className="success-note">הפגישה נוספה ללוח השנה.</p>
+        <p className="success-note">הפגישה נוספה ללוח השנה של המורה.</p>
+
+        <a
+          className="btn-primary btn-google"
+          href={googleCalendarUrl({
+            start: selectedSlot.start,
+            end: selectedSlot.end,
+            name, subject,
+          })}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          📅 הוסף ליומן Google שלי
+        </a>
+
         <button className="btn-secondary" onClick={() => window.location.reload()}>
           קביעת שיעור נוסף
         </button>
