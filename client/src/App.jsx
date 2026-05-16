@@ -85,9 +85,12 @@ function BookView() {
   const [subject, setSubject] = useState('');
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringUntil, setRecurringUntil] = useState('');
   const [status, setStatus] = useState('loading');
   const [errorMsg, setErrorMsg] = useState('');
   const [calendarConnected, setCalendarConnected] = useState(true);
+  const [createdOccurrences, setCreatedOccurrences] = useState(1);
 
   useEffect(() => {
     api.get('/api/slots')
@@ -108,20 +111,32 @@ function BookView() {
     name.trim().split(/\s+/).filter(Boolean).length >= 2 &&
     phone.trim().replace(/\D/g, '').length >= 9 &&
     subject.trim().length > 1 &&
-    selectedSlot !== null;
+    selectedSlot !== null &&
+    (!isRecurring || recurringUntil);
+
+  const minUntilDate = useMemo(() => {
+    if (!selectedSlot) return '';
+    const d = new Date(new Date(selectedSlot.start).getTime() + 7 * 24 * 60 * 60 * 1000);
+    return d.toISOString().split('T')[0];
+  }, [selectedSlot]);
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!canSubmit) return;
     setStatus('submitting');
     try {
-      await api.post('/api/book', {
+      const payload = {
         studentName: name.trim(),
         phone: phone.trim(),
         subject: subject.trim(),
         slotStart: selectedSlot.start,
         slotEnd: selectedSlot.end,
-      });
+      };
+      if (isRecurring && recurringUntil) {
+        payload.recurringUntil = new Date(`${recurringUntil}T23:59:59`).toISOString();
+      }
+      const { data } = await api.post('/api/book', payload);
+      setCreatedOccurrences(data.occurrences ?? 1);
       setStatus('success');
     } catch (err) {
       const msg = err.response?.data?.error ?? 'שגיאה בקביעת השיעור';
@@ -134,12 +149,15 @@ function BookView() {
     return (
       <div className="card success-card">
         <div className="success-icon">✓</div>
-        <h2>השיעור נקבע בהצלחה!</h2>
+        <h2>{createdOccurrences > 1 ? `${createdOccurrences} שיעורים נקבעו בהצלחה!` : 'השיעור נקבע בהצלחה!'}</h2>
         <div className="success-details">
           <p><strong>{name}</strong></p>
           <p>נושא: {subject}</p>
-          <p>{formatDateLong(selectedSlot.start)}</p>
+          <p>{formatDateLong(selectedSlot.start)}{createdOccurrences > 1 ? ' (ראשון מתוך הסדרה)' : ''}</p>
           <p>{formatTime(selectedSlot.start)} – {formatTime(selectedSlot.end)}</p>
+          {createdOccurrences > 1 && (
+            <p>חוזר כל שבוע, סה"כ {createdOccurrences} שיעורים</p>
+          )}
         </div>
         <p className="success-note">הפגישה נוספה ללוח השנה של המורה.</p>
 
@@ -235,6 +253,32 @@ function BookView() {
         </div>
       )}
 
+      {selectedSlot && (
+        <div className="recurring-section">
+          <label className="recurring-toggle">
+            <input
+              type="checkbox"
+              checked={isRecurring}
+              onChange={(e) => setIsRecurring(e.target.checked)}
+            />
+            <span>🔁 הפוך לשיעור חוזר שבועי</span>
+          </label>
+          {isRecurring && (
+            <div className="field">
+              <label htmlFor="until">השיעורים יחזרו על עצמם עד תאריך:</label>
+              <input
+                id="until" type="date"
+                value={recurringUntil}
+                min={minUntilDate}
+                onChange={(e) => setRecurringUntil(e.target.value)}
+                required
+              />
+              <p className="hint-text">השיעור יחזור על עצמו כל שבוע באותו יום ובאותה שעה</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {status === 'error' && (
         <div className="banner banner-error">{errorMsg}</div>
       )}
@@ -243,7 +287,7 @@ function BookView() {
         type="submit" className="btn-primary"
         disabled={!canSubmit || status === 'submitting'}
       >
-        {status === 'submitting' ? 'קובע שיעור...' : 'קבע/י שיעור'}
+        {status === 'submitting' ? 'קובע שיעור...' : (isRecurring ? 'קבע/י סדרת שיעורים' : 'קבע/י שיעור')}
       </button>
     </form>
   );

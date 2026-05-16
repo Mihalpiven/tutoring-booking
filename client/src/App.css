@@ -395,3 +395,36 @@ body {
   text-align: center;
   margin: 4px 0 0;
 }
+
+/* ── Recurring section ── */
+.recurring-section {
+  margin: 16px 0 20px;
+  padding: 16px;
+  background: var(--blue-light);
+  border: 1px solid var(--blue-border);
+  border-radius: 8px;
+}
+.recurring-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  cursor: pointer;
+  user-select: none;
+}
+.recurring-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+.recurring-section .field {
+  margin: 12px 0 0;
+}
+.hint-text {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin-top: 6px;
+}
