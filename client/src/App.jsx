@@ -13,6 +13,7 @@ const SUBJECTS = [
   'חדוא 2',
   'פיסיקה',
   'סטטיסטיקה',
+  'מדעי המחשב',
 ];
 
 function groupByDate(slots) {
@@ -229,7 +230,7 @@ function BookView() {
       )}
 
       {status !== 'loading' && slots.length === 0 && (
-        <p className="empty-msg">אין סלוטים פנויים השבוע.</p>
+        <p className="empty-msg">אין סלוטים פנויים בשבועיים הקרובים.</p>
       )}
 
       {status !== 'loading' && slots.length > 0 && (
