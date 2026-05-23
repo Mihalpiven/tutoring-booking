@@ -428,3 +428,53 @@ body {
   color: var(--gray-600);
   margin-top: 6px;
 }
+
+/* ── Edit booking ── */
+.booking-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.btn-edit {
+  padding: 8px 16px;
+  background: #fff;
+  color: var(--blue);
+  border: 1.5px solid var(--blue);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-edit:hover {
+  background: var(--blue);
+  color: #fff;
+}
+.recurring-badge {
+  font-size: 0.8rem;
+  color: var(--blue);
+  font-weight: 600;
+  margin-right: 6px;
+}
+.edit-panel {
+  margin: 8px 0 16px;
+  padding: 16px;
+  background: var(--blue-light);
+  border: 1px solid var(--blue-border);
+  border-radius: 8px;
+}
+.edit-panel .section-title {
+  margin-top: 0;
+}
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.edit-actions .btn-primary,
+.edit-actions .btn-secondary {
+  flex: 1;
+  margin: 0;
+}

@@ -300,6 +300,10 @@ function CancelView() {
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [cancelingUrl, setCancelingUrl] = useState(null);
+  const [editingUrl, setEditingUrl] = useState(null);
+  const [editSlots, setEditSlots] = useState([]);
+  const [editSelectedSlot, setEditSelectedSlot] = useState(null);
+  const [editStatus, setEditStatus] = useState('idle');
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -333,6 +337,55 @@ function CancelView() {
     setCancelingUrl(null);
   }
 
+  async function startEdit(booking) {
+    setEditingUrl(booking.url);
+    setEditSelectedSlot(null);
+    setEditStatus('loading');
+    setErrorMsg('');
+    try {
+      const { data } = await api.get('/api/slots');
+      setEditSlots(data.slots);
+      setEditStatus('idle');
+    } catch {
+      setErrorMsg('שגיאה בטעינת המועדים הפנויים');
+      setEditStatus('idle');
+      setEditingUrl(null);
+    }
+  }
+
+  function cancelEdit() {
+    setEditingUrl(null);
+    setEditSelectedSlot(null);
+    setEditStatus('idle');
+  }
+
+  async function confirmEdit(booking) {
+    if (!editSelectedSlot) return;
+    setEditStatus('submitting');
+    try {
+      await api.post('/api/edit-booking', {
+        url: booking.url,
+        etag: booking.etag,
+        newSlotStart: editSelectedSlot.start,
+        newSlotEnd: editSelectedSlot.end,
+        studentName: booking.studentName,
+        phone: booking.phone,
+        subject: booking.subject,
+        isRecurring: booking.isRecurring,
+      });
+      // עדכון הרשימה מקומית
+      setBookings(bookings.map((b) =>
+        b.url === booking.url
+          ? { ...b, start: editSelectedSlot.start, end: editSelectedSlot.end }
+          : b
+      ));
+      cancelEdit();
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error ?? 'שגיאה בעדכון');
+      setEditStatus('idle');
+    }
+  }
+
   return (
     <div className="card form-card">
       <h2 className="section-title">חיפוש שיעורים</h2>
@@ -360,21 +413,77 @@ function CancelView() {
             <p className="empty-msg">לא נמצאו שיעורים על השם הזה.</p>
           )}
           {bookings.map((b) => (
-            <div key={b.url} className="booking-item">
-              <div className="booking-info">
-                <div className="booking-date">{formatDateLong(b.start)}</div>
-                <div className="booking-time">
-                  {formatTime(b.start)} – {formatTime(b.end)}
+            <div key={`${b.url}-${b.start}`}>
+              <div className="booking-item">
+                <div className="booking-info">
+                  <div className="booking-date">{formatDateLong(b.start)}</div>
+                  <div className="booking-time">
+                    {formatTime(b.start)} – {formatTime(b.end)}
+                  </div>
+                  <div className="booking-summary">
+                    {b.summary}
+                    {b.isRecurring && <span className="recurring-badge"> 🔁 חוזר</span>}
+                  </div>
                 </div>
-                <div className="booking-summary">{b.summary}</div>
+                <div className="booking-actions">
+                  {!b.isRecurring && editingUrl !== b.url && (
+                    <button className="btn-edit" onClick={() => startEdit(b)}>
+                      ערוך
+                    </button>
+                  )}
+                  <button
+                    className="btn-danger"
+                    disabled={cancelingUrl === b.url}
+                    onClick={() => handleCancel(b)}
+                  >
+                    {cancelingUrl === b.url ? 'מבטל...' : 'בטל'}
+                  </button>
+                </div>
               </div>
-              <button
-                className="btn-danger"
-                disabled={cancelingUrl === b.url}
-                onClick={() => handleCancel(b)}
-              >
-                {cancelingUrl === b.url ? 'מבטל...' : 'בטל'}
-              </button>
+
+              {editingUrl === b.url && (
+                <div className="edit-panel">
+                  <h3 className="section-title">בחר/י מועד חדש</h3>
+                  {editStatus === 'loading' && (
+                    <div className="loading"><div className="spinner" /><span>טוען...</span></div>
+                  )}
+                  {editStatus !== 'loading' && editSlots.length === 0 && (
+                    <p className="empty-msg">אין מועדים פנויים בשבועיים הקרובים.</p>
+                  )}
+                  {editStatus !== 'loading' && editSlots.length > 0 && (
+                    <div className="slots-container">
+                      {Object.entries(groupByDate(editSlots)).map(([dateLabel, daySlots]) => (
+                        <div key={dateLabel} className="day-group">
+                          <div className="day-label">{dateLabel}</div>
+                          <div className="slots-row">
+                            {daySlots.map((slot) => (
+                              <button
+                                key={slot.id} type="button"
+                                className={`slot-btn ${editSelectedSlot?.id === slot.id ? 'selected' : ''}`}
+                                onClick={() => setEditSelectedSlot(slot)}
+                              >
+                                {formatTime(slot.start)} – {formatTime(slot.end)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="edit-actions">
+                    <button
+                      className="btn-primary"
+                      onClick={() => confirmEdit(b)}
+                      disabled={!editSelectedSlot || editStatus === 'submitting'}
+                    >
+                      {editStatus === 'submitting' ? 'מעדכן...' : 'אשר/י שינוי'}
+                    </button>
+                    <button className="btn-secondary" onClick={cancelEdit}>
+                      ביטול
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
